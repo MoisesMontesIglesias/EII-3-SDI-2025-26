@@ -1,0 +1,94 @@
+{% extends "layout.twig" %}
+
+{% block title %} Detalles de canción {% endblock %}
+
+{% block main_container %}
+      <div class="row">
+        <div class="media col-xs-10">
+          <div class="media-left media-middle">
+            <img class="media-object" src="{% if song.artworkUrl is defined and song.artworkUrl != '' %}{{ song.artworkUrl }}{% else %}/covers/{{ song._id }}.png{% endif %}" onerror="this.src='/images/song1.png';">
+          </div>
+          <div class="media-body">
+              <h2>{{ song.title }}</h2>
+              <p>{{ song.author }}</p>
+              <p>{{ song.kind }}</p>
+              {% if song.note is defined and song.note != '' %}
+                  <p><strong>Nota:</strong> {{ song.note }}</p>
+              {% endif %}
+               {% if canBuy %}
+                  <form class="form-horizontal" method="post" action="/songs/buy/{{ song._id }}">
+                      <button type="submit" class="btn btn-primary">Comprar: {{ song.price }}€</button>
+                  </form>
+               {% else %}
+                {% if song.previewUrl is defined and song.previewUrl != '' %}
+                    <audio controls>
+                        <source src="{{ song.previewUrl }}" type="audio/mpeg">
+                    </audio>
+                {% else %}
+                    <audio controls>
+                        <source src="/audios/{{ song._id }}.mp3" type="audio/mpeg">
+                    </audio>
+                {% endif %}
+                {% endif %}
+               <a class="btn btn-default pull-right" style="margin-right: 10px;" href="/songs/favorites/add/{{ song._id }}">Añadir a favoritos</a>
+              <!-- Cambiar el precio por "reproducir" si ya está comprada -->
+           </div>
+         </div>
+       </div>
+
+      {% if itunesResults is defined and itunesResults|length > 0 %}
+       <div class="row" style="margin-top: 20px;">
+           <div class="media col-xs-10">
+               <h3>Resultados en iTunes</h3>
+               <div class="list-group">
+                   {% for item in itunesResults %}
+                       <a class="list-group-item" href="{{ item.trackViewUrl }}" target="_blank" rel="noopener">
+                           <strong>{{ item.trackName }}</strong>
+                           {% if item.artistName is defined %} - {{ item.artistName }}{% endif %}
+                           {% if item.collectionName is defined %}
+                               <br><small>{{ item.collectionName }}</small>
+                           {% endif %}
+                       </a>
+                   {% endfor %}
+               </div>
+           </div>
+       </div>
+      {% endif %}
+      
+     <!-- -->
+     <div class="row" style="margin-top: 20px;" >
+        <div class="media col-xs-10">
+              <div class="media-left media-middle">
+                <a href="#">
+                  <img class="media-object" src="images/user.png" >
+                </a>
+              </div>
+              <div class="media-body">
+                <h4 class="media-heading">Middle aligned media</h4>
+                Cras sit amet nibh libero, in gravida nulla. Nulla vel metus scelerisque ante sollicitudin commodo. Cras purus odio, vestibulum in vulputate at, tempus viverra turpis. Fusce condimentum nunc ac nisi vulputate fringilla. Donec lacinia congue felis in faucibus.
+              </div>
+          </div>
+        <div class="media col-xs-10">
+              <div class="media-left media-middle">
+                <a href="#">
+                  <img class="media-object" src="images/user.png" >
+                </a>
+              </div>
+              <div class="media-body">
+                <h4 class="media-heading">Middle aligned media</h4>
+                Cras sit amet nibh libero, in gravida nulla. Nulla vel metus scelerisque ante sollicitudin commodo. Cras purus odio, vestibulum in vulputate at, tempus viverra turpis. Fusce condimentum nunc ac nisi vulputate fringilla. Donec lacinia congue felis in faucibus.
+              </div>
+          </div>
+        <div class="media col-xs-10">
+              <div class="media-left media-middle">
+                <a href="#">
+                  <img class="media-object" src="images/user.png" >
+                </a>
+              </div>
+              <div class="media-body">
+                <h4 class="media-heading">Middle aligned media</h4>
+                Cras sit amet nibh libero, in gravida nulla. Nulla vel metus scelerisque ante sollicitudin commodo. Cras purus odio, vestibulum in vulputate at, tempus viverra turpis. Fusce condimentum nunc ac nisi vulputate fringilla. Donec lacinia congue felis in faucibus.
+              </div>
+          </div>
+      </div>
+{% endblock %}

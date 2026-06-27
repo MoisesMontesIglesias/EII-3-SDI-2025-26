@@ -1,0 +1,87 @@
+{% extends "layout.twig" %}
+
+{% block title %} Canciones importadas {% endblock %}
+
+{% block main_container %}
+<h2>Canciones importadas desde iTunes</h2>
+
+<div class="row" style="margin-bottom: 20px;">
+    <div class="col-sm-12">
+        <a href="/itunes" class="btn btn-primary">Buscar más canciones</a>
+    </div>
+</div>
+
+{% if songs|length == 0 %}
+    <div class="alert alert-info">No hay canciones importadas todavía.</div>
+{% else %}
+    <div class="row">
+        {% for song in songs %}
+            <div class="col-sm-6 col-md-4" id="itunes-song-{{ song.id }}">
+                <div class="thumbnail">
+                    {% if song.artworkUrl is defined and song.artworkUrl != '' %}
+                        <img src="{{ song.artworkUrl }}" alt="{{ song.title }}">
+                    {% endif %}
+                    <div class="caption">
+                        <h4>{{ song.title }}</h4>
+                        <p>{{ song.artist }}</p>
+                        <p>{{ song.album }}</p>
+                        <p>Nota</p>
+                        <textarea class="form-control itunes-note" rows="3">{{ song.note }}</textarea>
+                        <div style="margin-top: 10px;">
+                            <button class="btn btn-primary btn-update-itunes" type="button" data-song-id="{{ song.id }}">Guardar</button>
+                            <button class="btn btn-danger btn-delete-itunes" type="button" data-song-id="{{ song.id }}">Eliminar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+<script>
+    $(document).on('click', '.btn-update-itunes', function () {
+        let card = $(this).closest('.col-sm-6');
+        let songId = $(this).attr('data-song-id');
+        let note = card.find('.itunes-note').val();
+
+        $.ajax({
+            url: "/itunes/" + songId,
+            type: "PUT",
+            data: {
+                note: note
+            },
+            success: function () {
+                $(".container .container").prepend("<div class='alert alert-success'>Cancion actualizada correctamente</div>");
+                setTimeout(function () {
+                    window.location = "/itunes/library";
+                }, 500);
+            },
+            error: function (error) {
+                let message = "Error al actualizar la cancion";
+                if (error.responseJSON && error.responseJSON.error) {
+                    message = error.responseJSON.error;
+                }
+                $(".container .container").prepend("<div class='alert alert-danger'>" + message + "</div>");
+            }
+        });
+    });
+
+    $(document).on('click', '.btn-delete-itunes', function () {
+        let songId = $(this).attr('data-song-id');
+        $.ajax({
+            url: "/itunes/" + songId,
+            type: "DELETE",
+            success: function () {
+                $("#itunes-song-" + songId).remove();
+            },
+            error: function (error) {
+                let message = "Error al eliminar la cancion";
+                if (error.responseJSON && error.responseJSON.error) {
+                    message = error.responseJSON.error;
+                }
+                $(".container .container").prepend("<div class='alert alert-danger'>" + message + "</div>");
+            }
+        });
+    });
+</script>
+{% endblock %}

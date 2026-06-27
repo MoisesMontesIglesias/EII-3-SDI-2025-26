@@ -1,0 +1,11 @@
+$kind: http-request
+url: "https://localhost:4000/api/v1.0/songs"
+method: POST
+body:
+  mode: raw
+  raw: |
+    { "title" : "Cancion API 2" , "kind" : "pop", "price" : 3 }
+headers:
+  - name: Content-Type
+    value: application/json
+order: 1775905890594

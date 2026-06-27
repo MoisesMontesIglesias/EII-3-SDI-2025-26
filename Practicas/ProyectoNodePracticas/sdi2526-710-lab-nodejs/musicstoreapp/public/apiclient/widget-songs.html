@@ -1,0 +1,101 @@
+<div id="widget-songs">
+  <input type="text" class="form-control" placeholder="Filtrar por nombre" id="filter-by-name"/>
+  <button class="btn btn-primary" onclick="widgetAddSong()">Nueva Canción</button>
+  <button class="btn" onclick="loadSongs()">Actualizar</button>
+  <table class="table table-hover">
+    <thead>
+    <tr>
+      <th><a onclick="sortByTitle()">Título</a></th>
+      <th>Género</th>
+      <th><a onclick="sortByPrice()">Precio</a></th>
+      <th class="col-md-1"></th>
+    </tr>
+    </thead>
+    <tbody id="songsTableBody"></tbody>
+  </table>
+</div>
+<script>
+  window.history.pushState("", "", "/apiclient/client.html?w=songs");
+
+  var selectedSongId;
+  var songs = [];
+
+  function widgetAddSong() {
+    $("#main-container").load("widget-add.html");
+  }
+
+  $("#filter-by-name").on("input", function () {
+    if (!Array.isArray(songs)) {
+      return;
+    }
+
+    let filterValue = $(this).val().toLowerCase();
+    let filteredSongs = songs.filter(song =>
+      song.title.toLowerCase().includes(filterValue)
+    );
+    updateSongsTable(filteredSongs);
+  });
+
+  var priceDesc = true;
+
+  function sortByPrice() {
+    if (priceDesc) {
+      songs.sort(function (a, b) {
+        return parseFloat(a.price) - parseFloat(b.price);
+      });
+    } else {
+      songs.sort(function (a, b) {
+        return parseFloat(b.price) - parseFloat(a.price);
+      });
+    }
+    updateSongsTable(songs);
+    priceDesc = !priceDesc //invertir ordenación
+  }
+
+
+  function sortByTitle() {
+    songs.sort(function (a, b) {
+      return a.title.localeCompare(b.title);
+    });
+    updateSongsTable(songs);
+  }
+
+  function loadSongs() {
+    $.ajax({
+      url: URLbase + "/songs",
+      type: "GET",
+      data: {},
+      dataType: "json",
+      headers: { "token": token },
+      success: function (response) {
+        songs = response.songs;
+        updateSongsTable(songs);
+      },
+      error: function () {
+        $("#main-container").load("widget-login.html");
+      }
+    });
+  }
+
+  function updateSongsTable(songsToRender) {
+    $("#songsTableBody").empty();
+    for (let i = 0; i < songsToRender.length; i++) {
+      $("#songsTableBody").append(
+        "<tr id='" + songsToRender[i]._id + "'>" +
+          "<td>" + songsToRender[i].title + "</td>" +
+          "<td>" + songsToRender[i].kind + "</td>" +
+          "<td>" + songsToRender[i].price + "</td>" +
+          "<td>" +
+            "<a onclick=\"songDetail('" + songsToRender[i]._id + "')\">Detalles</a><br>" +
+            "<a onclick=\"songDelete('" + songsToRender[i]._id + "')\">Eliminar</a>" +
+          "</td>" +
+        "</tr>"
+      );
+    }
+  }
+
+  function songDetail(_id) {
+    selectedSongId = _id;
+    $("#main-container").load("widget-detail.html");
+  }
+</script>

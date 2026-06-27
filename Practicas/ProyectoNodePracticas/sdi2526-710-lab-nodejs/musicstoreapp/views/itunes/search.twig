@@ -1,0 +1,74 @@
+{% extends "layout.twig" %}
+
+{% block title %} Buscar en iTunes {% endblock %}
+
+{% block main_container %}
+<h2>Buscar canciones en iTunes</h2>
+
+<form class="form-inline" method="get" action="/itunes" style="margin-bottom: 20px;">
+    <div class="form-group">
+        <label class="sr-only" for="term">Nombre</label>
+        <input type="text" class="form-control" id="term" name="term" placeholder="Nombre de la canción" value="{{ term }}">
+    </div>
+    <button type="submit" class="btn btn-primary">Buscar</button>
+    <a href="/itunes/library" class="btn btn-default">Mis importadas</a>
+</form>
+
+{% if term != '' and results|length == 0 %}
+    <div class="alert alert-warning">No se han encontrado resultados para {{ term }}</div>
+{% endif %}
+
+{% if results|length > 0 %}
+    <div class="row">
+        {% for item in results %}
+            <div class="col-sm-6 col-md-4">
+                <div class="thumbnail">
+                    {% if item.artworkUrl100 is defined %}
+                        <img src="{{ item.artworkUrl100 }}" alt="{{ item.trackName }}">
+                    {% endif %}
+                    <div class="caption">
+                        <h4>{{ item.trackName }}</h4>
+                        <p>{{ item.artistName }}</p>
+                        <p>{{ item.collectionName }}</p>
+                        <p>Precio: {{ item.priceEur }} €</p>
+                        <button class="btn btn-success btn-import-itunes"
+                                type="button"
+                                data-track-id="{{ item.trackId }}"
+                                data-price-eur="{{ item.priceEur }}">
+                            Importar
+                        </button>
+                        {% if item.previewUrl is defined and item.previewUrl != '' %}
+                            <a class="btn btn-default" href="{{ item.previewUrl }}" target="_blank" rel="noopener">Preview</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+<script>
+    $(document).on('click', '.btn-import-itunes', function () {
+        let trackId = $(this).data('track-id');
+        let priceEur = $(this).data('price-eur');
+        $.ajax({
+            url: "/itunes/import",
+            type: "POST",
+            data: {
+                trackId: trackId,
+                priceEur: priceEur
+            },
+            success: function () {
+                window.location = "/itunes/library";
+            },
+            error: function (error) {
+                let message = "Error al importar la cancion";
+                if (error.responseJSON && error.responseJSON.error) {
+                    message = error.responseJSON.error;
+                }
+                $(".container .container").prepend("<div class='alert alert-danger'>" + message + "</div>");
+            }
+        });
+    });
+</script>
+{% endblock %}
