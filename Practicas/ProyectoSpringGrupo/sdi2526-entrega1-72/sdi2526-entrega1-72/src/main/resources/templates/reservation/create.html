@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es" th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="#{reservation.create.title}">Crear reserva</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<main>
+    <section class="space-shell">
+        <header class="space-header">
+            <div>
+                <p class="space-kicker" th:text="#{reservation.create.kicker}">Reserva</p>
+                <h1 th:text="#{reservation.create.heading(${space != null ? space.name : 'Espacio'})}">Crear reserva</h1>
+                <p class="hint-text" th:text="#{reservation.create.hint}">Selecciona la franja horaria deseada y confirma el motivo.</p>
+            </div>
+            <div class="header-actions">
+                <div class="lang-switch">
+                    <span th:text="#{common.language}">Idioma</span>
+                    <a th:href="|?lang=es|" th:text="#{lang.es}">ES</a>
+                    <span>|</span>
+                    <a th:href="|?lang=en|" th:text="#{lang.en}">EN</a>
+                </div>
+                <a class="secondary-btn link-btn"
+                   th:if="${space != null}"
+                   th:href="@{/spaces/{id}(id=${space.id})}"
+                   style="width:160px; height:42px; display:inline-flex; align-items:center; justify-content:center; box-sizing:border-box; color:#1f3a4b; font-weight:600; font-size:1rem;"
+                   th:text="#{reservation.create.back}">Volver al detalle</a>
+            </div>
+        </header>
+
+        <div class="top-error" th:if="${formError}" th:text="#{${formError}}">
+            El espacio no está disponible en ese horario.
+        </div>
+
+        <form class="space-filter space-form"
+              th:action="@{/spaces/{id}/reservas/nueva(id=${space.id})}"
+              method="post">
+            <div class="field-row">
+                <label for="startDateTime" th:text="#{reservation.create.start}">Inicio</label>
+                <input id="startDateTime" name="startDateTime" type="datetime-local" th:value="${startDateTime}" required />
+                <div class="field-error" th:if="${startDateTimeError != null}" th:text="#{${startDateTimeError}}">Error</div>
+            </div>
+            <div class="field-row">
+                <label for="endDateTime" th:text="#{reservation.create.end}">Fin</label>
+                <input id="endDateTime" name="endDateTime" type="datetime-local" th:value="${endDateTime}" required />
+                <div class="field-error" th:if="${endDateTimeError != null}" th:text="#{${endDateTimeError}}">Error</div>
+            </div>
+            <div class="field-row">
+                <label for="reason" th:text="#{reservation.create.reason}">Motivo (opcional)</label>
+                <textarea id="reason" name="reason" rows="3" maxlength="250" th:text="${reason}" th:placeholder="#{reservation.create.reason.placeholder}" placeholder="Reunión, taller, estudio..."></textarea>
+                <div class="field-error" th:if="${reasonError != null}" th:text="#{${reasonError}}">Error</div>
+            </div>
+            <div class="field-row checkbox-row">
+                <label class="checkbox-label" for="recurringWeekly">
+                    <input id="recurringWeekly" name="recurringWeekly" type="checkbox" th:checked="${recurringWeekly}" />
+                    <span th:text="#{reservation.create.recurringWeekly}">Crear reserva semanal recurrente</span>
+                </label>
+            </div>
+            <div class="field-row">
+                <label for="recurrenceWeeks" th:text="#{reservation.create.recurrenceWeeks}">Número de semanas</label>
+                <input id="recurrenceWeeks" name="recurrenceWeeks" type="number" min="2" max="12" th:value="${recurrenceWeeks}" />
+                <div class="field-error" th:if="${recurrenceWeeksError != null}" th:text="#{${recurrenceWeeksError}}">Error</div>
+            </div>
+            <div class="form-actions">
+                <button class="primary-btn" type="submit" th:text="#{reservation.create.submit}">Confirmar reserva</button>
+                <a class="secondary-btn link-btn" th:href="@{/spaces/{id}(id=${space.id})}" th:text="#{reservation.create.cancel}">Cancelar</a>
+            </div>
+        </form>
+    </section>
+</main>
+<footer class="footer" th:text="#{app.footer}">
+    SDI 2026 - Gestión de reservas
+</footer>
+<script>
+    (function () {
+        const startInput = document.getElementById('startDateTime');
+        const endInput = document.getElementById('endDateTime');
+        if (!startInput || !endInput) {
+            return;
+        }
+
+        const toLocalDateTimeMin = function (date) {
+            const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+            return local.toISOString().slice(0, 16);
+        };
+
+        startInput.min = toLocalDateTimeMin(new Date());
+
+        const addOneHour = function (value) {
+            if (!value) {
+                return toLocalDateTimeMin(new Date(Date.now() + 60 * 60 * 1000));
+            }
+            const date = new Date(value);
+            date.setHours(date.getHours() + 1);
+            return toLocalDateTimeMin(date);
+        };
+
+        const syncEndMin = function () {
+            endInput.min = addOneHour(startInput.value);
+            if (endInput.value && endInput.value < endInput.min) {
+                endInput.value = endInput.min;
+            }
+        };
+
+        startInput.addEventListener('input', syncEndMin);
+        syncEndMin();
+    })();
+</script>
+</body>
+</html>

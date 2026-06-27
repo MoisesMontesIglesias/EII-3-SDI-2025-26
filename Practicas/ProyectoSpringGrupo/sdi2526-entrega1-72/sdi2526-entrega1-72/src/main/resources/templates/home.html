@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es" th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="#{home.title}">Reserva - Bienvenida</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<main>
+    <section class="hero-shell">
+        <div class="lang-switch hero-lang-switch">
+            <span th:text="#{common.language}">Idioma</span>
+            <a th:href="|/?lang=es|" th:text="#{lang.es}">ES</a>
+            <span>|</span>
+            <a th:href="|/?lang=en|" th:text="#{lang.en}">EN</a>
+        </div>
+
+        <div class="hero-card">
+            <div class="hero-copy">
+                <span class="hero-eyebrow" th:text="#{home.eyebrow}">Gestión de reservas</span>
+                <h1 th:text="#{home.heading}">Bienvenido a la plataforma de reservas</h1>
+                <p th:text="#{home.description}">
+                    Organiza aulas y salas desde un solo lugar. Entra con tu cuenta o crea una nueva para empezar.
+                </p>
+                <div class="hero-actions">
+                    <a class="primary-btn link-btn hero-btn" th:href="@{/login}" th:text="#{home.login}">Iniciar sesión</a>
+                    <a class="secondary-btn link-btn hero-btn" th:href="@{/signup}" th:text="#{home.signup}">Registrarse</a>
+                </div>
+            </div>
+
+            <div class="hero-panel">
+                <div class="hero-panel-card">
+                    <h2 th:text="#{home.card.title}">Todo listo para empezar</h2>
+                    <ul class="hero-list">
+                        <li th:text="#{home.card.item1}">Consulta espacios disponibles en segundos.</li>
+                        <li th:text="#{home.card.item2}">Gestiona tus reservas desde un panel claro.</li>
+                        <li th:text="#{home.card.item3}">Accede con una cuenta existente o regístrate al momento.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+<footer class="footer" th:text="#{app.footer}">
+    SDI 2026 - Gestión de reservas
+</footer>
+</body>
+</html>

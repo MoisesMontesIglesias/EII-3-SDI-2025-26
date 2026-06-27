@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="#{profile.title}">Reserva - Mi perfil</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<main>
+    <section class="auth-shell">
+        <div class="auth-grid">
+            <aside class="auth-aside">
+                <h1 th:text="#{profile.heading}">Mi perfil</h1>
+                <p th:text="#{profile.description}">Consulta tus datos básicos de usuario.</p>
+            </aside>
+
+            <div class="auth-form-wrap">
+                <h2 th:text="#{profile.card.title}">Datos personales</h2>
+                <div class="info-box">
+                    <p class="info-title" th:text="#{profile.name}">Nombre</p>
+                    <p class="info-body" th:text="${profileUser.name}">Ana</p>
+                </div>
+                <div class="info-box">
+                    <p class="info-title" th:text="#{profile.lastName}">Apellidos</p>
+                    <p class="info-body" th:text="${profileUser.lastName}">Suárez</p>
+                </div>
+                <div class="actions">
+                    <a class="text-link" th:href="${backPath}" th:text="#{common.back}">Volver</a>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+<footer class="footer" th:text="#{app.footer}">
+    SDI 2026 - Gestión de reservas
+</footer>
+</body>
+</html>

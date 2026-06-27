@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es" th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="#{login.title}">Reserva - Login</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<main>
+    <section class="auth-shell">
+        <div class="auth-grid">
+            <aside class="auth-aside">
+                <h1 th:text="#{login.heading}">Zona de acceso</h1>
+                <p th:text="#{login.description}">Accede con tu DNI para consultar espacios disponibles o gestionar reservas globales si eres administrador.</p>
+            </aside>
+
+            <div class="auth-form-wrap">
+                <div class="lang-switch">
+                    <span th:text="#{common.language}">Idioma</span>
+                    <a th:href="|?lang=es|" th:text="#{lang.es}">ES</a>
+                    <span>|</span>
+                    <a th:href="|?lang=en|" th:text="#{lang.en}">EN</a>
+                </div>
+
+                <h2 th:text="#{login.form.title}">Iniciar sesión</h2>
+                <p class="hint-text" th:text="#{login.form.hint}">Introduce tus credenciales.</p>
+
+                <form th:action="@{/login}" th:object="${user}" method="post">
+                    <div class="field-row">
+                        <label for="dni" th:text="#{login.dni}">DNI</label>
+                        <input id="dni" type="text" th:field="*{dni}" th:placeholder="#{login.dni.placeholder}" placeholder="12345678Z" required />
+                        <div class="field-error" th:if="${#fields.hasErrors('dni')}" th:text="${#fields.errors('dni')[0]}"></div>
+                    </div>
+
+                    <div class="field-row">
+                        <label for="password" th:text="#{login.password}">Contraseña</label>
+                        <div class="password-field">
+                            <input id="password" type="password" th:field="*{password}" required />
+                            <button class="password-toggle" type="button"
+                                    th:attr="aria-label=#{common.password.toggle.show},title=#{common.password.toggle.show}"
+                                    data-password-toggle aria-pressed="false"></button>
+                        </div>
+                        <div class="field-error" th:if="${#fields.hasErrors('password')}" th:text="${#fields.errors('password')[0]}"></div>
+                    </div>
+
+                    <div class="actions">
+                        <a th:href="@{/signup}" class="text-link" th:text="#{login.create.account}">Crear cuenta</a>
+                        <button id="btn-login" class="primary-btn" type="submit" th:text="#{login.submit}">Entrar</button>
+                    </div>
+                </form>
+
+                <div class="top-error" th:if="${loginError}" th:text="#{login.error}"></div>
+
+                <!-- Logout no aplica en la pantalla de login -->
+            </div>
+        </div>
+    </section>
+</main>
+<footer class="footer" th:text="#{app.footer}">
+    SDI 2026 - Gestión de reservas
+</footer>
+<script th:src="@{/js/password-toggle.js}"></script>
+</body>
+</html>

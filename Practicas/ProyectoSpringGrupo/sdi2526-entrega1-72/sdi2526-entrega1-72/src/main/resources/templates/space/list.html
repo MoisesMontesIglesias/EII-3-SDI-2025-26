@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="es" th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="#{spaces.list.title}">Listado de espacios disponibles</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<main>
+    <section class="space-shell">
+        <header class="space-header">
+            <div>
+                <p class="space-kicker" th:text="#{spaces.kicker}">Panel de espacios</p>
+                <h1 th:text="${session != null and session.role == 'ADMIN'} ? #{spaces.list.heading.admin} : #{spaces.list.heading.user}">
+                    Listado de espacios disponibles
+                </h1>
+                <p class="hint-text"
+                   th:text="${session != null and session.role == 'ADMIN'} ? #{spaces.list.hint.admin} : #{spaces.list.hint.user}">
+                    Explora salas, aulas y puestos de cowork disponibles para reservar.
+                </p>
+            </div>
+            <div class="header-actions">
+                <div class="lang-switch">
+                    <span th:text="#{common.language}">Idioma</span>
+                    <a th:href="|?lang=es|" th:text="#{lang.es}">ES</a>
+                    <span>|</span>
+                    <a th:href="|?lang=en|" th:text="#{lang.en}">EN</a>
+                </div>
+                <a class="secondary-btn link-btn"
+                   th:if="${session != null and session.authenticated}"
+                   th:href="@{/profile}"
+                   style="width:160px; height:42px; display:inline-flex; align-items:center; justify-content:center; box-sizing:border-box; color:#1f3a4b; font-weight:600; font-size:1rem;"
+                   th:text="#{profile.link}">Mi perfil</a>
+                <a class="secondary-btn link-btn"
+                   th:if="${session != null and session.role == 'USER'}"
+                   th:href="@{/reservas/mis}"
+                   style="width:160px; height:42px; display:inline-flex; align-items:center; justify-content:center; box-sizing:border-box; color:#1f3a4b; font-weight:600; font-size:1rem;"
+                   th:text="#{reservations.mine.link}">Mis reservas</a>
+                <a class="secondary-btn link-btn"
+                   th:if="${session != null and session.role == 'USER'}"
+                   th:href="@{/password/change}"
+                   style="width:160px; height:42px; display:inline-flex; align-items:center; justify-content:center; text-align:center; box-sizing:border-box; color:#1f3a4b; font-weight:600; font-size:1rem;"
+                   th:text="#{password.change.link}">Cambiar contraseña</a>
+                <form th:if="${session != null and session.authenticated}" th:action="@{/logout}" method="post">
+                    <button class="secondary-btn"
+                            type="submit"
+                            style="width:160px; height:42px; display:inline-flex; align-items:center; justify-content:center; box-sizing:border-box; color:#1f3a4b; font-weight:600; font-size:1rem;"
+                            th:text="#{common.logout}">Cerrar sesión</button>
+                </form>
+            </div>
+        </header>
+
+        <div class="filter-row">
+            <div class="filter-box">
+                <form id="spaces-filter-form" class="space-filter space-filter-spaces" th:action="@{/spaces}" method="get">
+                    <div class="field-row">
+                        <label for="type" th:text="#{spaces.filter.type}">Tipo</label>
+                        <select id="type" name="type">
+                            <option value="" th:text="#{common.all}">Todos</option>
+                            <option th:each="type : ${spaceTypes}"
+                                    th:value="${type}"
+                                    th:selected="${selectedType == type}"
+                                    th:text="${#messages.msgOrNull('space.type.' + type) ?: type}">
+                                SALA
+                            </option>
+                        </select>
+                    </div>
+                    <div class="field-row">
+                        <label for="minCapacity" th:text="#{spaces.filter.capacity}">Capacidad mínima</label>
+                        <input id="minCapacity" name="minCapacity" type="number" min="1"
+                               th:value="${selectedMinCapacity}"
+                               th:placeholder="#{spaces.filter.capacity.placeholder}"
+                               placeholder="1" />
+                    </div>
+                    <div class="filter-actions" style="display:flex; flex-direction:column; gap:0.6rem; align-items:stretch;">
+                        <button id="btn-filter-spaces" class="primary-btn" type="submit" th:text="#{spaces.filter.button}">Filtrar</button>
+                        <a class="secondary-btn link-btn" th:href="@{/spaces}" th:text="#{common.clear.filters}">
+                            Eliminar filtros
+                        </a>
+                    </div>
+                </form>
+            </div>
+            <div class="filter-side" th:if="${session != null and session.role == 'ADMIN'}"
+                 style="display:flex; flex-direction:column; gap:0.6rem; align-items:stretch;">
+                <a class="secondary-btn link-btn filter-action"
+                   th:href="@{/espacios/nuevo(lang=${#locale.language})}"
+                   style="min-width:160px; min-height:42px; display:inline-flex; align-items:center; justify-content:center; box-sizing:border-box;"
+                   th:text="#{spaces.admin.new}">Nuevo espacio</a>
+                <a class="secondary-btn link-btn filter-action"
+                   th:href="@{/reservas/listado-global(lang=${#locale.language})}"
+                   style="min-width:160px; min-height:42px; display:inline-flex; align-items:center; justify-content:center; box-sizing:border-box;"
+                   th:text="#{spaces.admin.view.reservations}">Ver reservas</a>
+            </div>
+        </div>
+
+        <div th:if="${noSpacesMessage != null}" class="top-error" th:text="#{spaces.no.spaces}">
+            No hay espacios registrados.
+        </div>
+
+        <div th:if="${spaces == null or #lists.isEmpty(spaces)}" class="top-error" th:text="#{spaces.no.results}">
+            No hay espacios disponibles con los filtros actuales.
+        </div>
+
+        <table id="spaces-table" th:if="${spaces != null and !#lists.isEmpty(spaces)}" class="space-table">
+            <thead>
+            <tr>
+                <th th:text="#{spaces.table.name}">Nombre</th>
+                <th th:text="#{spaces.table.type}">Tipo</th>
+                <th th:text="#{spaces.table.location}">Ubicación</th>
+                <th th:text="#{spaces.table.capacity}">Capacidad</th>
+                <th sec:authorize="hasRole('ADMIN')" th:text="#{spaces.table.status}">Estado</th>
+                <th th:text="#{spaces.table.actions}">Acciones</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr class="space-row" th:each="space : ${spaces}">
+                <td th:text="${space.name != null ? space.name : '-'}">Sala Norte</td>
+                <td>
+                    <span class="type-pill"
+                          th:text="${space.type != null ? (#messages.msgOrNull('space.type.' + space.type) ?: space.type) : '-'}">SALA</span>
+                </td>
+                <td th:text="${space.location != null ? space.location : '-'}">Edificio A</td>
+                <td>
+                    <span class="capacity-pill"
+                          th:text="${space.capacity != null ? space.capacity + ' plazas' : '-'}">8 plazas</span>
+                </td>
+                <td sec:authorize="hasRole('ADMIN')">
+                    <span class="status-pill"
+                          th:classappend="${space.status == T(com.uniovi.sdi.reservationmanagement.entities.SpaceStatus).ACTIVE} ? 'status-reservation' : 'status-block'"
+                          th:text="${space.status == T(com.uniovi.sdi.reservationmanagement.entities.SpaceStatus).ACTIVE ? #messages.msg('space.status.active') : #messages.msg('space.status.cancelled')}">
+                        ACTIVO
+                    </span>
+                </td>
+                <td>
+                    <a class="text-link space-detail-link" th:href="@{/spaces/{id}(id=${space.id})}" th:text="#{spaces.detail.link}">Ver detalle</a>
+                    <span class="actions-separator" sec:authorize="hasRole('ADMIN')">|</span>
+                    <a class="text-link" sec:authorize="hasRole('ADMIN')" th:href="@{/espacios/{id}/editar(id=${space.id})}" th:text="#{spaces.detail.edit}">
+                        Editar
+                    </a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <nav class="pagination-bar" th:if="${spacesPage != null and spacesPage.totalPages > 1}">
+            <a id="prev-page"
+               class="secondary-btn link-btn"
+               th:if="${spacesPage.hasPrevious()}"
+               th:href="@{/spaces(page=${spacesPage.number - 1}, type=${selectedType}, minCapacity=${selectedMinCapacity})}"
+               th:text="#{common.previous}">
+                Anterior
+            </a>
+            <span class="hint-text" th:text="'Pagina ' + (${spacesPage.number} + 1) + ' de ' + ${spacesPage.totalPages}">
+                Página 1 de 2
+            </span>
+            <a id="next-page"
+               class="secondary-btn link-btn"
+               th:if="${spacesPage.hasNext()}"
+               th:href="@{/spaces(page=${spacesPage.number + 1}, type=${selectedType}, minCapacity=${selectedMinCapacity})}"
+               th:text="#{common.next}">
+                Siguiente
+            </a>
+        </nav>
+    </section>
+</main>
+<footer class="footer" th:text="#{app.footer}">
+    SDI 2026 - Gestión de reservas
+</footer>
+</body>
+</html>
