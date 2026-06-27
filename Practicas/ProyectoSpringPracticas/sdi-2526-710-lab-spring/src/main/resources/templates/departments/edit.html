@@ -1,0 +1,58 @@
+<!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-spring4-4.dtd">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/head"><title> Página de inicio</title></head>
+<body>
+<nav th:replace="fragments/nav"></nav>
+<div class="container" id="main-container">
+    <h2>Editar departamento</h2>
+    <form class="form-horizontal" method="post" th:action="${'/departments/edit/'+ department.id}">
+        <div class="form-group">
+            <label class="control-label col-sm-2" for="code">Código:</label>
+            <div class="col-sm-10">
+                <input th:value="${department.code}" id="code" type="text" class="form-control"
+                       name="code"
+                       placeholder="Escribe un codigo" required/>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label col-sm-2" for="name">Nombre:</label>
+            <div class="col-sm-10">
+                <input th:value="${department.name}" id="name" type="text" class="form-control"
+                       name="name"
+                       placeholder="Escribe un nombre" required/>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label col-sm-2" for="faculty">Facultad:</label>
+            <div class="col-sm-10">
+                <input th:value="${department.faculty}" id="faculty" type="text" class="form-control"
+                       name="faculty"
+                       placeholder="Escribe una facultad" required/>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label col-sm-2" for="phone">Teléfono:</label>
+            <div class="col-sm-10">
+                <input th:value="${department.phone}" id="phone" type="text" class="form-control"
+                       name="phone"
+                       placeholder="Escribe un teléfono" required/>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label col-sm-2" for="professors">Profesores:</label>
+            <div class="col-sm-10">
+                <input th:value="${department.professors}" id="professors" type="number" class="form-control" name="professors"
+                       placeholder="1 o más"
+                       required/>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <button type="submit" class="btn btn-primary">Modificar</button>
+            </div>
+        </div>
+    </form>
+</div>
+<footer th:replace="fragments/footer"></footer>
+</body>
+</html>

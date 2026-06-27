@@ -1,0 +1,46 @@
+<!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-spring4-4.dtd">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.w3.org/1999/xhtml">
+<head th:replace="fragments/head"><title> Página de inicio</title></head>
+<body>
+<nav th:replace="fragments/nav"></nav>
+<div class="container" style="text-align: center">
+    <div class="container" id="main-container">
+        <h2>Departamentos</h2>
+        <p>Los departamentos que actualmente figuran en el sistema son las siguientes:</p>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    <th scope="col">id</th>
+                    <th scope="col">Codigo</th>
+                    <th scope="col">Nombre</th>
+                    <th scope="col">Facultad</th>
+                    <th scope="col">Teléfono</th>
+                    <th scope="col">Profesores</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="department : ${departmentList}">
+                    <td scope="row" th:text="${department.id}"> 1</td>
+                    <td th:text="${department.code}"> Codigo 1</td>
+                    <td th:text="${department.name}">Nombre 1 </td>
+                    <td th:text="${department.faculty}"> Facultad 1</td>
+                    <td th:text="${department.phone}"> Teléfono 1</td>
+                    <td th:text="${department.professors}">10</td>
+
+                    <td><a sec:authorize="hasAnyRole('PROFESSOR','ADMIN')" th:href="${'/departments/details/' + department.id}">detalles</a></td>
+                    <td><a sec:authorize="hasRole('ADMIN')" th:href="${'/departments/edit/' + department.id}">modificar</a></td>
+                    <td><a sec:authorize="hasRole('ADMIN')" th:href="${'/departments/delete/' + department.id}">eliminar</a></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div th:if="${#lists.isEmpty(departmentList)}"> No departments </div>
+    </div>
+
+</div>
+<footer th:replace="fragments/footer"></footer>
+</body>
+</html>
+

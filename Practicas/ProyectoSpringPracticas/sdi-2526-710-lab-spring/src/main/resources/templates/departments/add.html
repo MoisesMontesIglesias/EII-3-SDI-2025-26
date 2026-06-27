@@ -1,0 +1,52 @@
+<!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-spring4-4.dtd">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/head"><title> Página de inicio</title></head>
+<body>
+<nav th:replace="fragments/nav"></nav>
+<div class="container" id="main-container">
+  <h2>Agregar departamento</h2>
+  <form class="form-horizontal" method="post" action="/departments/add" th:object="${department}">
+    <div class="form-group">
+      <label class="control-label col-sm-2" for="code">Codigo:</label>
+      <div class="col-sm-10">
+        <input type="text" class="form-control" id="code" name="code" placeholder="Escribe un codigo" required="true" />
+        <span class="text-danger" th:if="${#fields.hasErrors('code')}" th:errors="*{code}"></span>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="control-label col-sm-2" for="name">Nombre:</label>
+      <div class="col-sm-10">
+        <input type="text" class="form-control" id="name" name="name" placeholder="Escribe un nombre" required="true" />
+        <span class="text-danger" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></span>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="control-label col-sm-2" for="faculty">Facultad:</label>
+      <div class="col-sm-10">
+        <input type="text" class="form-control" id="faculty" name="faculty" placeholder="Escribe el nombre de una facultad" required="true" />
+        <span class="text-danger" th:if="${#fields.hasErrors('faculty')}" th:errors="*{faculty}"></span>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="control-label col-sm-2" for="phone">Teléfono:</label>
+      <div class="col-sm-10">
+        <input type="text" class="form-control" id="phone" name="phone" placeholder="Escribe un telefono" required="true" />
+        <span class="text-danger" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}"></span>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="control-label col-sm-2" for="professors">Profesores:</label>
+      <div class="col-sm-10">
+        <input type="number" class="form-control" id="professors" name="professors" placeholder="1 o más" required="true" />
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="col-sm-offset-2 col-sm-10">
+        <button type="submit" class="btn btn-primary">Enviar</button>
+      </div>
+    </div>
+  </form>
+</div>
+<footer th:replace="fragments/footer"></footer>
+</body>
+</html>

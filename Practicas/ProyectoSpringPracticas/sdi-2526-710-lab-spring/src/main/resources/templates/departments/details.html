@@ -1,0 +1,44 @@
+<!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-spring4-4.dtd">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/head"><title> Página de inicio</title></head>
+<body>
+<nav th:replace="fragments/nav"></nav><div class="container" id="main-container">
+    <h2>Detalles de los departamentos</h2>
+    <div class="card">
+        <div class="card-header">Codigo</div>
+        <div class="card-body">
+            <p class="card-text" th:text="${department.code}">Codigo 1</p>
+        </div>
+    </div>
+    <br>
+    <div class="card">
+        <div class="card-header">Nombre</div>
+        <div class="card-body">
+            <p class="card-text" th:text="${department.name}">Nombre 1</p>
+        </div>
+    </div>
+    <br>
+    <div class="card">
+        <div class="card-header">Facultad</div>
+        <div class="card-body">
+            <p class="card-text" th:text="${department.faculty}">Facultad 1</p>
+        </div>
+    </div>
+    <br>
+    <div class="card">
+        <div class="card-header">Teléfono</div>
+        <div class="card-body">
+            <p class="card-text" th:text="${department.phone}">Teléfono 1</p>
+        </div>
+    </div>
+    <br>
+    <div class="card">
+        <div class="card-header">Profesores</div>
+        <div class="card-body">
+            <p class="card-text" th:text="${department.professors}">100</p>
+        </div>
+    </div>
+</div>
+<footer th:replace="fragments/footer"></footer>
+</body>
+</html>
