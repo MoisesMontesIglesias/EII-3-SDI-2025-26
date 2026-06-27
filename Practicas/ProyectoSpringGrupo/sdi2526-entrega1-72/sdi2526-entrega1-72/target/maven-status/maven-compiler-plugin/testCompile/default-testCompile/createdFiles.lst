@@ -1,0 +1,13 @@
+com/uniovi/sdi/reservationmanagement/SecurityTest.class
+com/uniovi/sdi/reservationmanagement/pageobjects/PO_View.class
+com/uniovi/sdi/reservationmanagement/util/SeleniumUtils.class
+com/uniovi/sdi/reservationmanagement/pageobjects/PO_SpacesTestHelpers.class
+com/uniovi/sdi/reservationmanagement/ReservationsTest.class
+com/uniovi/sdi/reservationmanagement/controllers/UserControllerTest.class
+com/uniovi/sdi/reservationmanagement/pageobjects/PO_GlobalReservationsView.class
+com/uniovi/sdi/reservationmanagement/pageobjects/PO_LoginView.class
+com/uniovi/sdi/reservationmanagement/pageobjects/PO_SpacesView.class
+com/uniovi/sdi/reservationmanagement/ReservationsTest$UserCredentials.class
+com/uniovi/sdi/reservationmanagement/services/UserServiceTest.class
+com/uniovi/sdi/reservationmanagement/SpacesSeleniumFunctionalTest.class
+com/uniovi/sdi/reservationmanagement/pageobjects/PO_ReservationsView.class

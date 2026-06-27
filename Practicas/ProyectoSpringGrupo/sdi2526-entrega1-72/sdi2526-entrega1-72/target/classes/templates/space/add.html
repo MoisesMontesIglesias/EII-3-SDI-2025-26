@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es" th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="#{space.create.title}">Registrar nuevo espacio</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+
+<body>
+
+<main>
+    <section class="space-shell">
+        <header class="space-header">
+            <div>
+                <p class="space-kicker" th:text="#{admin.panel}">Panel administrador</p>
+                <h1 th:text="#{space.create.heading}">Registrar nuevo espacio</h1>
+                <p class="hint-text" th:text="#{space.create.hint}">
+                    Crea salas, aulas o puestos cowork con su ubicación y capacidad.
+                </p>
+            </div>
+            <div class="header-actions">
+                <div class="lang-switch">
+                    <span th:text="#{common.language}">Idioma</span>
+                    <a th:href="|?lang=es|" th:text="#{lang.es}">ES</a>
+                    <span>|</span>
+                    <a th:href="|?lang=en|" th:text="#{lang.en}">EN</a>
+                </div>
+            </div>
+        </header>
+        <form class="space-filter space-form"
+              th:action="@{/espacios/nuevo}"
+              method="post"
+              th:object="${space}">
+            <div class="field-row">
+                <label for="name" th:text="#{space.form.name}">Nombre</label>
+                <input id="name"
+                       type="text"
+                       th:field="*{name}"
+                       th:placeholder="#{space.form.name.placeholder}"
+                       placeholder="Sala Norte"
+                       required>
+                <div class="field-error"
+                     th:if="${#fields.hasErrors('name')}"
+                     th:errors="*{name}">
+                </div>
+            </div>
+            <div class="field-row">
+                <label for="spaceType" th:text="#{space.form.type}">Tipo</label>
+                <select id="spaceType" th:field="*{type}" required>
+                    <option value=""
+                            disabled
+                            th:text="#{space.form.type.placeholder}">
+                        Selecciona un tipo
+                    </option>
+                    <option th:each="type : ${spaceTypes}"
+                            th:value="${type}"
+                            th:text="${#messages.msgOrNull('space.type.' + type) ?: type}">
+                        SALA
+                    </option>
+                </select>
+                <div class="field-error"
+                     th:if="${#fields.hasErrors('type')}"
+                     th:errors="*{type}">
+                </div>
+            </div>
+            <div class="field-row">
+                <label for="location" th:text="#{space.form.location}">Ubicación</label>
+                <input id="location"
+                       type="text"
+                       th:field="*{location}"
+                       th:placeholder="#{space.form.location.placeholder}"
+                       placeholder="Edificio A - Planta 1"
+                       required>
+                <div class="field-error"
+                     th:if="${#fields.hasErrors('location')}"
+                     th:errors="*{location}">
+                </div>
+            </div>
+            <div class="field-row">
+                <label for="capacity" th:text="#{space.form.capacity}">Capacidad</label>
+                <input id="capacity"
+                       type="number"
+                       min="1"
+                       th:attr="max=${maxCapacity}"
+                       th:field="*{capacity}"
+                       th:placeholder="#{space.form.capacity.placeholder}"
+                       placeholder="1"
+                       required>
+                <div class="field-error"
+                     th:if="${#fields.hasErrors('capacity')}"
+                     th:errors="*{capacity}">
+                </div>
+            </div>
+            <div class="field-row">
+                <label for="description" th:text="#{space.form.description}">Descripción</label>
+
+                <input id="description"
+                       type="text"
+                       th:field="*{description}"
+                       th:placeholder="#{space.form.description.placeholder}"
+                       placeholder="Sala luminosa para reuniones">
+            </div>
+            <div class="field-row">
+                <label for="status" th:text="#{space.form.status}">Estado</label>
+
+                <select id="status" th:field="*{status}" required>
+                    <option th:value="ACTIVE" th:text="#{space.status.active}">ACTIVO</option>
+                    <option th:value="CANCELLED" th:text="#{space.status.cancelled}">CANCELADO</option>
+                </select>
+            </div>
+            <div class="form-actions">
+                <button class="primary-btn"
+                        type="submit"
+                        th:text="#{space.form.submit}">
+                    Registrar espacio
+                </button>
+                <a class="secondary-btn link-btn"
+                   th:href="@{/reservas/listado-global}"
+                   th:text="#{common.back}">
+                    Volver
+                </a>
+            </div>
+        </form>
+    </section>
+</main>
+<footer class="footer" th:text="#{app.footer}">
+    SDI 2026 - Gestión de reservas
+</footer>
+</body>
+</html>

@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="es" th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="#{space.detail.title}">Detalle del espacio</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<main>
+    <section class="space-shell">
+        <header class="space-header">
+            <div>
+                <p class="space-kicker" th:text="#{space.detail.kicker}">Ficha del espacio</p>
+                <h1 th:text="${space != null ? space.name : 'Detalle del espacio'}">Detalle del espacio</h1>
+                <p class="hint-text">
+                    <span th:text="#{space.detail.type.label}">Tipo:</span>
+                    <span class="type-pill"
+                          th:text="${space != null ? (#messages.msgOrNull('space.type.' + space.type) ?: space.type) : '-'}">SALA</span> |
+                    <span th:text="#{space.detail.location.label}">Ubicación:</span>
+                    <strong th:text="${space != null && space.location != null ? space.location : '-'}">Edificio A</strong> |
+                    <span th:text="#{space.detail.capacity.label}">Capacidad:</span>
+                    <strong th:text="${space != null && space.capacity != null ? space.capacity + ' plazas' : '-'}">8 plazas</strong> |
+                    <span th:text="#{space.detail.status.label}">Estado:</span>
+                    <span class="status-pill"
+                          th:classappend="${space != null and space.status == T(com.uniovi.sdi.reservationmanagement.entities.SpaceStatus).ACTIVE} ? 'status-reservation' : 'status-block'"
+                          th:text="${space != null && space.status == T(com.uniovi.sdi.reservationmanagement.entities.SpaceStatus).ACTIVE ? 'ACTIVO' : 'CANCELADO'}">ACTIVO</span>
+                </p>
+                <div class="info-box space-description">
+                    <p class="info-title" th:text="#{space.detail.description.title}">Descripción</p>
+                    <p class="info-body" th:text="${space != null && space.description != null ? space.description : 'Sin descripción.'}">
+                        Sala luminosa para reuniones.
+                    </p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <div class="lang-switch">
+                    <span th:text="#{common.language}">Idioma</span>
+                    <a th:href="|?lang=es|" th:text="#{lang.es}">ES</a>
+                    <span>|</span>
+                    <a th:href="|?lang=en|" th:text="#{lang.en}">EN</a>
+                </div>
+                <a id="btn-create-reservation" class="primary-btn link-btn"
+                   th:if="${session != null and session.role == 'USER'}"
+                   th:href="@{/spaces/{id}/reservas/nueva(id=${space.id}, dateFrom=${dateFrom})}"
+                   style="width:160px; height:42px; display:inline-flex; align-items:center; justify-content:center; text-align:center; line-height:1; box-sizing:border-box;"
+                   th:text="#{space.detail.create.reservation}">Crear reserva</a>
+                <a class="secondary-btn link-btn"
+                   th:href="@{/spaces}"
+                   style="width:160px; height:42px; display:inline-flex; align-items:center; justify-content:center; box-sizing:border-box; color:#1f3a4b; font-weight:600; font-size:1rem;"
+                   th:text="#{space.detail.back}">Volver al listado</a>
+                <a class="secondary-btn link-btn" sec:authorize="hasRole('ADMIN')" th:href="@{/espacios/{id}/editar(id=${space.id})}" th:text="#{space.detail.edit}">Editar</a>
+            </div>
+        </header>
+
+        <form id="availability-form" class="space-filter" th:action="@{/spaces/{id}/availability(id=${space.id})}" method="get">
+            <div class="field-row">
+                <label for="dateFrom" th:text="#{space.availability.dateFrom}">Fecha inicio</label>
+                <input id="dateFrom" name="dateFrom" type="date" th:value="${dateFrom}" required />
+            </div>
+            <div class="field-row">
+                <label for="dateTo" th:text="#{space.availability.dateTo}">Fecha fin</label>
+                <input id="dateTo" name="dateTo" type="date" th:value="${dateTo}" required />
+            </div>
+            <button id="btn-check-availability" class="primary-btn" type="submit" th:text="#{space.availability.button}">Consultar disponibilidad</button>
+        </form>
+
+        <div class="title-row" style="display:flex; align-items:center; justify-content:space-between; gap:0.8rem;">
+            <h2 class="title-row-text" th:text="#{space.occupied.heading}">Franjas ocupadas</h2>
+            <button id="open-maintenance-dialog" class="secondary-btn link-btn header-actions-btn" sec:authorize="hasRole('ADMIN')" type="button" style="display:inline-flex; align-items:center;">
+                Registrar un nuevo mantenimiento
+            </button>
+        </div>
+        <p class="hint-text" th:if="${occupiedSlots == null or #lists.isEmpty(occupiedSlots)}" th:text="#{space.occupied.empty}">
+            No hay reservas activas ni bloqueos activos en el rango consultado.
+        </p>
+
+        <table id="occupied-slots-table" th:if="${occupiedSlots != null and !#lists.isEmpty(occupiedSlots)}" class="space-table">
+            <thead>
+            <tr>
+                <th th:text="#{space.occupied.table.start}">Inicio</th>
+                <th th:text="#{space.occupied.table.end}">Fin</th>
+                <th th:text="#{space.occupied.table.type}">Tipo</th>
+                <th th:text="#{space.occupied.table.description}">Descripción</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr class="occupied-slot-row" th:each="slot : ${occupiedSlots}">
+                <td th:text="${#temporals.format(slot.startDateTime(), 'dd/MM/yyyy HH:mm')}">01/01/2026 09:00</td>
+                <td th:text="${#temporals.format(slot.endDateTime(), 'dd/MM/yyyy HH:mm')}">01/01/2026 10:00</td>
+                <td>
+                    <span class="status-pill"
+                          th:classappend="${slot.source() == 'BLOQUEO'} ? 'status-block' : 'status-reservation'"
+                          th:text="${#messages.msgOrNull('slot.source.' + slot.source()) ?: slot.source()}">RESERVA</span>
+                </td>
+                    <td th:text="${slot.description() != null ? slot.description() : '-'}">Reunión</td>
+            </tr>
+            </tbody>
+        </table>
+
+        <div th:if="${session != null and session.role == 'ADMIN'}">
+            <div class="title-row" style="display:flex; align-items:center; justify-content:space-between; gap:0.8rem;">
+                <h2 class="title-row-text" th:text="#{space.maintenance.heading}">Bloqueos de mantenimiento</h2>
+            </div>
+            <p class="hint-text" th:if="${maintenanceBlocks == null or #lists.isEmpty(maintenanceBlocks)}"
+               th:text="#{space.maintenance.empty}">
+                No hay bloqueos de mantenimiento registrados.
+            </p>
+
+            <table th:if="${maintenanceBlocks != null and !#lists.isEmpty(maintenanceBlocks)}" class="space-table">
+                <thead>
+                <tr>
+                    <th th:text="#{space.maintenance.table.start}">Inicio</th>
+                    <th th:text="#{space.maintenance.table.end}">Fin</th>
+                    <th th:text="#{space.maintenance.table.status}">Estado</th>
+                    <th th:text="#{space.maintenance.table.description}">Descripción</th>
+                    <th th:text="#{space.maintenance.table.actions}">Acciones</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="block : ${maintenanceBlocks}">
+                    <td th:text="${#temporals.format(block.startDateTime, 'dd/MM/yyyy HH:mm')}">01/01/2026 09:00</td>
+                    <td th:text="${#temporals.format(block.endDateTime, 'dd/MM/yyyy HH:mm')}">01/01/2026 10:00</td>
+                    <td>
+                        <span class="status-pill"
+                              th:classappend="${block.status == T(com.uniovi.sdi.reservationmanagement.entities.BlockStatus).ACTIVE and !block.endDateTime.isBefore(T(java.time.LocalDateTime).now())} ? 'status-block' : 'status-reservation'"
+                              th:text="${block.status == T(com.uniovi.sdi.reservationmanagement.entities.BlockStatus).CANCELLED ? 'CANCELADO' : (block.endDateTime.isBefore(T(java.time.LocalDateTime).now()) ? 'TERMINADO' : 'ACTIVO')}">
+                            ACTIVO
+                        </span>
+                    </td>
+                    <td th:text="${block.reason != null ? block.reason : '-'}">Mantenimiento</td>
+                    <td>
+                        <form th:if="${block.status == T(com.uniovi.sdi.reservationmanagement.entities.BlockStatus).ACTIVE and !block.endDateTime.isBefore(T(java.time.LocalDateTime).now())}"
+                              th:action="@{/espacios/{spaceId}/bloqueos/{blockId}/cancelar(spaceId=${space.id}, blockId=${block.id})}"
+                              method="post">
+                            <button class="secondary-btn link-btn" type="submit" th:text="#{space.maintenance.table.cancel}">
+                                Cancelar
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <dialog id="maintenance-dialog"
+                class="space-dialog"
+                sec:authorize="hasRole('ADMIN')"
+                th:attr="data-open=${showBlockModal}">
+            <form class="space-filter space-form"
+                  th:action="@{/espacios/{id}/bloqueos/nuevo(id=${space.id})}"
+                  method="post" th:object="${blockForm}">
+                <header class="space-header">
+                    <div>
+                        <p class="space-kicker" th:text="#{space.maintenance.dialog.kicker}">Bloqueo de mantenimiento</p>
+                        <h2 th:text="#{space.maintenance.dialog.heading}">Bloquear para mantenimiento</h2>
+                        <p class="hint-text" th:text="#{space.maintenance.dialog.hint}">Indica el rango y el motivo del bloqueo.</p>
+                    </div>
+                </header>
+                <div class="field-row">
+                    <label for="startDateTime" th:text="#{space.maintenance.dialog.start}">Inicio</label>
+                    <input id="startDateTime" type="datetime-local" th:field="*{startDateTime}" required />
+                    <div class="field-error" th:if="${#fields.hasErrors('startDateTime')}" th:errors="*{startDateTime}">Error</div>
+                </div>
+                <div class="field-row">
+                    <label for="endDateTime" th:text="#{space.maintenance.dialog.end}">Fin</label>
+                    <input id="endDateTime" type="datetime-local" th:field="*{endDateTime}" required />
+                    <div class="field-error" th:if="${#fields.hasErrors('endDateTime')}" th:errors="*{endDateTime}">Error</div>
+                </div>
+                <div class="field-row">
+                    <label for="reason" th:text="#{space.maintenance.dialog.reason}">Descripción</label>
+                    <input id="reason" type="text" th:field="*{reason}" required />
+                    <div class="field-error" th:if="${#fields.hasErrors('reason')}" th:errors="*{reason}">Error</div>
+                </div>
+                <div class="info-box" th:if="${collisionSlots != null and !#lists.isEmpty(collisionSlots)}">
+                    <p class="info-title" th:text="#{space.maintenance.dialog.collisions}">Colisiones detectadas</p>
+                    <ul class="info-body">
+                        <li th:each="slot : ${collisionSlots}"
+                            th:text="${#temporals.format(slot.startDateTime(), 'dd/MM/yyyy HH:mm')} + ' - ' + ${#temporals.format(slot.endDateTime(), 'dd/MM/yyyy HH:mm')} + ' (' + ${slot.source()} + ')'">
+                            01/01/2026 09:00 - 01/01/2026 10:00 (RESERVA)
+                        </li>
+                    </ul>
+                </div>
+                <div class="form-actions">
+                    <button class="primary-btn" type="submit" th:text="#{space.maintenance.dialog.submit}">
+                        Registrar bloqueo
+                    </button>
+                    <button id="close-maintenance-dialog" class="secondary-btn" type="button" th:text="#{space.maintenance.dialog.close}">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+        </dialog>
+    </section>
+</main>
+<footer class="footer" th:text="#{app.footer}">
+    SDI 2026 - Gestión de reservas
+</footer>
+<script>
+    (function () {
+        const dateFromInput = document.getElementById('dateFrom');
+        const dateToInput = document.getElementById('dateTo');
+        const blockStartInput = document.getElementById('startDateTime');
+        const blockEndInput = document.getElementById('endDateTime');
+        const dialog = document.getElementById('maintenance-dialog');
+        const openBtn = document.getElementById('open-maintenance-dialog');
+        const closeBtn = document.getElementById('close-maintenance-dialog');
+
+        const toLocalDate = function (date) {
+            const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+            return local.toISOString().slice(0, 10);
+        };
+
+        const toLocalDateTime = function (date) {
+            const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+            return local.toISOString().slice(0, 16);
+        };
+
+        const today = toLocalDate(new Date());
+        if (dateFromInput && dateToInput) {
+            dateFromInput.min = today;
+            dateToInput.min = dateFromInput.value || today;
+            dateFromInput.addEventListener('input', function () {
+                dateToInput.min = dateFromInput.value || today;
+                if (dateToInput.value && dateToInput.value < dateToInput.min) {
+                    dateToInput.value = dateToInput.min;
+                }
+            });
+        }
+
+        const nowMin = toLocalDateTime(new Date());
+        if (blockStartInput && blockEndInput) {
+            blockStartInput.min = nowMin;
+            blockEndInput.min = blockStartInput.value || nowMin;
+            blockStartInput.addEventListener('input', function () {
+                blockEndInput.min = blockStartInput.value || nowMin;
+                if (blockEndInput.value && blockEndInput.value < blockEndInput.min) {
+                    blockEndInput.value = blockEndInput.min;
+                }
+            });
+        }
+
+        if (dialog && openBtn) {
+            openBtn.addEventListener('click', function () {
+                dialog.showModal();
+            });
+        }
+        if (dialog && closeBtn) {
+            closeBtn.addEventListener('click', function () {
+                dialog.close();
+            });
+        }
+        if (dialog && dialog.dataset && dialog.dataset.open === 'true') {
+            dialog.showModal();
+        }
+    })();
+</script>
+</body>
+</html>

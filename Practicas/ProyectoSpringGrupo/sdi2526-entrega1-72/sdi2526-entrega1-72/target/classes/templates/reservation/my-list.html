@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es" th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="#{reservations.mine.title}">Mis reservas</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<main>
+    <section class="space-shell">
+        <header class="space-header">
+            <div>
+                <p class="space-kicker" th:text="#{reservations.mine.kicker}">Panel personal</p>
+                <h1 th:text="#{reservations.mine.heading}">Mis reservas</h1>
+                <p class="hint-text" th:text="#{reservations.mine.hint}">Consulta tus reservas activas y canceladas.</p>
+            </div>
+            <div class="header-actions">
+                <div class="lang-switch">
+                    <span th:text="#{common.language}">Idioma</span>
+                    <a th:href="|?lang=es|" th:text="#{lang.es}">ES</a>
+                    <span>|</span>
+                    <a th:href="|?lang=en|" th:text="#{lang.en}">EN</a>
+                </div>
+                <a class="secondary-btn link-btn"
+                   th:href="@{/profile(from='reservations')}"
+                   style="width:160px; height:42px; display:inline-flex; align-items:center; justify-content:center; box-sizing:border-box; color:#1f3a4b; font-weight:600; font-size:1rem;"
+                   th:text="#{profile.link}">Mi perfil</a>
+                <a class="secondary-btn link-btn profile-btn home-btn"
+                   th:href="@{/spaces}"
+                   th:attr="aria-label=#{reservations.mine.back},title=#{reservations.mine.back}"></a>
+                <form th:if="${session != null and session.authenticated}" th:action="@{/logout}" method="post">
+                    <button class="secondary-btn"
+                            type="submit"
+                            style="width:160px; height:42px; display:inline-flex; align-items:center; justify-content:center; box-sizing:border-box; color:#1f3a4b; font-weight:600; font-size:1rem;"
+                            th:text="#{common.logout}">Cerrar sesión</button>
+                </form>
+            </div>
+        </header>
+
+        <div class="top-error" th:if="${cancelError}" th:text="#{${cancelError}}">
+            No se pudo cancelar la reserva.
+        </div>
+        <div class="top-error" th:if="${creationError}" th:text="#{${creationError}}">
+            No se pudo registrar la reserva.
+        </div>
+
+        <div class="filter-row">
+            <div class="filter-box">
+                <form id="my-reservations-filter-form" class="space-filter space-filter-spaces" th:action="@{/reservas/mis}" method="get">
+                    <div class="field-row">
+                        <label for="status" th:text="#{reservations.mine.filter.status}">Estado</label>
+                        <select id="status" name="status">
+                            <option value="" th:text="#{common.all}">Todos</option>
+                            <option value="ACTIVE"
+                                    th:selected="${selectedStatus == 'ACTIVE'}"
+                                    th:text="#{reservation.status.ACTIVE}">ACTIVA</option>
+                            <option value="CANCELLED"
+                                    th:selected="${selectedStatus == 'CANCELLED'}"
+                                    th:text="#{reservation.status.CANCELLED}">CANCELADA</option>
+                        </select>
+                    </div>
+                    <button class="primary-btn" type="submit" th:text="#{common.filter}">Filtrar</button>
+                </form>
+            </div>
+        </div>
+
+        <div th:if="${#lists.isEmpty(reservations)}" class="top-error" th:text="#{reservations.mine.empty}">
+            No tienes reservas registradas.
+        </div>
+
+        <table id="my-reservations-table" th:if="${!#lists.isEmpty(reservations)}" class="space-table">
+            <thead>
+            <tr>
+                <th th:text="#{reservations.mine.table.space}">Espacio</th>
+                <th th:text="#{reservations.mine.table.start}">Inicio</th>
+                <th th:text="#{reservations.mine.table.end}">Fin</th>
+                <th th:text="#{reservations.mine.table.status}">Estado</th>
+                <th th:text="#{reservations.mine.table.reason}">Motivo</th>
+                <th th:text="#{reservations.mine.table.actions}">Acciones</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="reservation : ${reservations}">
+                <td th:text="${reservation.spaceName()}">Sala Norte</td>
+                <td th:text="${#temporals.format(reservation.startDateTime(), 'dd/MM/yyyy HH:mm')}">10/03/2026 09:00</td>
+                <td th:text="${#temporals.format(reservation.endDateTime(), 'dd/MM/yyyy HH:mm')}">10/03/2026 10:00</td>
+                <td>
+                    <span class="status-pill"
+                          th:classappend="${reservation.status() == 'CANCELLED'} ? 'status-block' : 'status-reservation'"
+                          th:text="${#messages.msgOrNull('reservation.status.' + reservation.status()) ?: reservation.status()}">ACTIVE</span>
+                </td>
+                <td th:text="${reservation.reason() != null ? reservation.reason() : '-'}">Reunión</td>
+                <td>
+                    <form th:if="${reservation.status() == 'ACTIVE'}"
+                          th:action="@{/reservas/{id}/cancelar(id=${reservation.id()})}"
+                          method="post">
+                        <button class="secondary-btn" type="submit" th:text="#{reservations.mine.cancel}">Cancelar</button>
+                    </form>
+                    <span th:if="${reservation.status() != 'ACTIVE'}">-</span>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+</main>
+<footer class="footer" th:text="#{app.footer}">
+    SDI 2026 - Gestión de reservas
+</footer>
+</body>
+</html>

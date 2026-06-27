@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es" th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="#{signup.title}">Reserva - Sign Up</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<main>
+    <section class="auth-shell">
+        <div class="auth-grid">
+            <aside class="auth-aside">
+                <h1 th:text="#{signup.heading}">Reserva tu espacio</h1>
+                <p th:text="#{signup.description}">Registra tu cuenta para gestionar reservas de aulas y salas desde un mismo panel.</p>
+            </aside>
+
+            <div class="auth-form-wrap">
+                <div class="lang-switch">
+                    <span th:text="#{common.language}">Idioma</span>
+                    <a th:href="|?lang=es|" th:text="#{lang.es}">ES</a>
+                    <span>|</span>
+                    <a th:href="|?lang=en|" th:text="#{lang.en}">EN</a>
+                </div>
+
+                <h2 th:text="#{signup.form.title}">Crear cuenta</h2>
+                <p class="hint-text" th:text="#{signup.form.hint}">Completa tus datos personales.</p>
+
+                <div class="top-error" th:if="${signupError}" th:text="#{signup.error}"></div>
+
+                <form th:action="@{/signup}" th:object="${user}" method="post">
+                    <div class="field-row">
+                        <label for="dni" th:text="#{signup.dni}">DNI</label>
+                        <input id="dni" type="text" th:field="*{dni}" th:placeholder="#{signup.dni.placeholder}" placeholder="12345678Z" required />
+                        <div class="field-error" th:if="${#fields.hasErrors('dni')}" th:text="${#fields.errors('dni')[0]}"></div>
+                    </div>
+
+                    <div class="field-row">
+                        <label for="name" th:text="#{signup.name}">Nombre</label>
+                        <input id="name" type="text" th:field="*{name}" th:placeholder="#{signup.name.placeholder}" placeholder="Nombre" required />
+                        <div class="field-error" th:if="${#fields.hasErrors('name')}" th:text="${#fields.errors('name')[0]}"></div>
+                    </div>
+
+                    <div class="field-row">
+                        <label for="lastName" th:text="#{signup.lastName}">Apellidos</label>
+                        <input id="lastName" type="text" th:field="*{lastName}" th:placeholder="#{signup.lastName.placeholder}" placeholder="Apellidos" required />
+                        <div class="field-error" th:if="${#fields.hasErrors('lastName')}" th:text="${#fields.errors('lastName')[0]}"></div>
+                    </div>
+
+                    <div class="field-row">
+                        <label for="password" th:text="#{signup.password}">Contraseña</label>
+                        <div class="password-field">
+                            <input id="password" type="password" th:field="*{password}" required />
+                            <button class="password-toggle" type="button"
+                                    th:attr="aria-label=#{common.password.toggle.show},title=#{common.password.toggle.show}"
+                                    data-password-toggle aria-pressed="false"></button>
+                        </div>
+                        <div class="field-error" th:if="${#fields.hasErrors('password')}" th:text="${#fields.errors('password')[0]}"></div>
+                    </div>
+
+                    <div class="field-row">
+                        <label for="passwordConfirm" th:text="#{signup.passwordConfirm}">Confirma tu contraseña</label>
+                        <div class="password-field">
+                            <input id="passwordConfirm" type="password" th:field="*{passwordConfirm}" required />
+                            <button class="password-toggle" type="button"
+                                    th:attr="aria-label=#{common.password.toggle.show},title=#{common.password.toggle.show}"
+                                    data-password-toggle aria-pressed="false"></button>
+                        </div>
+                        <div class="field-error" th:if="${#fields.hasErrors('passwordConfirm')}" th:text="${#fields.errors('passwordConfirm')[0]}"></div>
+                    </div>
+
+                    <div class="actions">
+                        <a th:href="@{/login}" class="text-link" th:text="#{signup.have.account}">Ya tengo cuenta</a>
+                        <button class="primary-btn" type="submit" th:text="#{signup.submit}">Crear cuenta</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+</main>
+<footer class="footer" th:text="#{app.footer}">
+    SDI 2026 - Gestión de reservas
+</footer>
+<script th:src="@{/js/password-toggle.js}"></script>
+</body>
+</html>

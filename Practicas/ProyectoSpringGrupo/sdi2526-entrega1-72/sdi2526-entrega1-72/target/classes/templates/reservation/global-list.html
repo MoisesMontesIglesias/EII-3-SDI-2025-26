@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es" th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="#{reservations.global.title}">Listado global de reservas</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<main>
+    <section class="space-shell">
+        <header class="space-header">
+            <div>
+                <p class="space-kicker" th:text="#{admin.panel}">Panel administrador</p>
+                <h1 th:text="#{reservations.global.heading}">Listado global de reservas</h1>
+                <p class="hint-text" th:text="#{reservations.global.hint}">Consulta reservas activas y canceladas de todo el sistema.</p>
+            </div>
+            <div class="header-actions">
+                <div class="lang-switch">
+                    <span th:text="#{common.language}">Idioma</span>
+                    <a th:href="|?lang=es|" th:text="#{lang.es}">ES</a>
+                    <span>|</span>
+                    <a th:href="|?lang=en|" th:text="#{lang.en}">EN</a>
+                </div>
+                <a class="secondary-btn link-btn"
+                   th:href="@{/profile(from='global')}"
+                   style="width:160px; height:42px; display:inline-flex; align-items:center; justify-content:center; box-sizing:border-box;"
+                   th:text="#{profile.link}">Mi perfil</a>
+                <a id="btn-export-csv"
+                   class="secondary-btn link-btn"
+                   style="width:160px; height:42px; display:inline-flex; align-items:center; justify-content:center; box-sizing:border-box;"
+                   th:href="@{/reservas/listado-global/csv(spaceId=${selectedSpaceId}, dateFrom=${dateFrom}, dateTo=${dateTo})}"
+                   th:text="#{reservations.export.csv}">Exportar CSV</a>
+                <a class="secondary-btn link-btn"
+                   th:if="${session != null and session.role == 'USER'}"
+                   th:href="@{/password/change}"
+                   th:text="#{password.change.link}">Cambiar contraseña</a>
+                <form th:if="${session != null and session.authenticated}" th:action="@{/logout}" method="post">
+                    <button class="secondary-btn"
+                            type="submit"
+                            style="width:160px; height:42px; display:inline-flex; align-items:center; justify-content:center; box-sizing:border-box; color:#1f3a4b; font-weight:600; font-size:1rem;"
+                            th:text="#{common.logout}">Cerrar sesión</button>
+                </form>
+            </div>
+        </header>
+
+        <div class="filter-row">
+            <div class="filter-box">
+                <form id="global-reservations-filter-form"
+                      class="space-filter space-filter-admin"
+                      th:action="@{/reservas/listado-global}"
+                      method="get">
+                    <div class="field-row">
+                        <label for="spaceId" th:text="#{reservations.filter.space}">Espacio</label>
+                        <select id="spaceId" name="spaceId">
+                            <option value="" th:text="#{common.all}">Todos</option>
+                            <option th:if="${spaces != null}"
+                                    th:each="space : ${spaces}"
+                                    th:value="${space.id}"
+                                    th:selected="${selectedSpaceId != null and selectedSpaceId == space.id}"
+                                    th:text="${space.name}">Sala Norte</option>
+                        </select>
+                    </div>
+                    <div class="field-row">
+                        <label for="dateFromFilter" th:text="#{reservations.filter.dateFrom}">Fecha inicio</label>
+                        <input id="dateFromFilter" name="dateFrom" type="date" th:value="${dateFrom}" />
+                    </div>
+                    <div class="field-row">
+                        <label for="dateToFilter" th:text="#{reservations.filter.dateTo}">Fecha fin</label>
+                        <input id="dateToFilter" name="dateTo" type="date" th:value="${dateTo}" />
+                    </div>
+                    <div class="filter-actions" style="display:flex; flex-direction:column; gap:0.6rem; align-items:stretch;">
+                        <button id="btn-filter-global-reservations" class="primary-btn" type="submit" th:text="#{common.filter}">Filtrar</button>
+                        <a class="secondary-btn link-btn" th:href="@{/reservas/listado-global}" th:text="#{common.clear.filters}">
+                            Eliminar filtros
+                        </a>
+                    </div>
+                </form>
+            </div>
+            <div class="filter-side">
+                <a class="secondary-btn link-btn filter-action"
+                   th:href="@{/spaces(lang=${#locale.language})}"
+                   style="min-width:160px; min-height:42px; display:inline-flex; align-items:center; justify-content:center; box-sizing:border-box;"
+                   th:text="#{spaces.admin.view.spaces}">Ver espacios</a>
+            </div>
+        </div>
+
+        <div th:if="${reservationsPage == null or reservationsPage.content.isEmpty()}" class="top-error" th:text="#{reservations.empty}">
+            No hay reservas para los filtros seleccionados.
+        </div>
+
+        <table id="global-reservations-table" class="space-table"
+               th:if="${reservationsPage != null and !reservationsPage.content.isEmpty()}">
+            <thead>
+            <tr>
+                <th th:text="#{reservations.table.user}">Usuario</th>
+                <th th:text="#{reservations.table.space}">Espacio</th>
+                <th th:text="#{reservations.table.start}">Inicio</th>
+                <th th:text="#{reservations.table.end}">Fin</th>
+                <th th:text="#{reservations.table.status}">Estado</th>
+                <th th:text="#{reservations.table.reason}">Motivo</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr class="global-reservation-row" th:each="reservation : ${reservationsPage.content}">
+                <td th:text="${reservation.userLabel() != null ? reservation.userLabel() : '-'}">Ana Suarez</td>
+                <td th:text="${reservation.spaceName() != null ? reservation.spaceName() : '-'}">Sala Norte</td>
+                <td th:text="${#temporals.format(reservation.startDateTime(), 'dd/MM/yyyy HH:mm')}">10/03/2026 09:00</td>
+                <td th:text="${#temporals.format(reservation.endDateTime(), 'dd/MM/yyyy HH:mm')}">10/03/2026 11:00</td>
+                <td>
+                    <span class="status-pill"
+                          th:classappend="${reservation.status() == T(com.uniovi.sdi.reservationmanagement.entities.ReservationStatus).CANCELLED} ? 'status-block' : 'status-reservation'"
+                          th:text="${#messages.msgOrNull('reservation.status.' + reservation.status()) ?: reservation.status()}">ACTIVO</span>
+                </td>
+                <td th:text="${reservation.reason() != null ? reservation.reason() : '-'}">-</td>
+            </tr>
+            </tbody>
+        </table>
+
+        <nav class="pagination-bar" th:if="${reservationsPage != null and reservationsPage.totalPages > 1}">
+            <a id="prev-page"
+               class="secondary-btn link-btn"
+               th:if="${reservationsPage.hasPrevious()}"
+               th:href="@{/reservas/listado-global(page=${reservationsPage.number - 1}, spaceId=${selectedSpaceId}, dateFrom=${dateFrom}, dateTo=${dateTo})}"
+               th:text="#{common.previous}">
+                Anterior
+            </a>
+            <span class="hint-text" th:text="#{reservations.pagination(${reservationsPage.number + 1}, ${reservationsPage.totalPages})}">Página 1 de 2</span>
+            <a id="next-page"
+               class="secondary-btn link-btn"
+               th:if="${reservationsPage.hasNext()}"
+               th:href="@{/reservas/listado-global(page=${reservationsPage.number + 1}, spaceId=${selectedSpaceId}, dateFrom=${dateFrom}, dateTo=${dateTo})}"
+               th:text="#{common.next}">
+                Siguiente
+            </a>
+        </nav>
+    </section>
+</main>
+<footer class="footer" th:text="#{app.footer}">
+    SDI 2026 - Gestión de reservas
+</footer>
+</body>
+</html>
